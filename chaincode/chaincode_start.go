@@ -146,7 +146,8 @@ func (t *SimpleChaincode) changeValue(stub shim.ChaincodeStubInterface,args []st
 
         valAsbytes, err2 := stub.GetState(key)
         //convert byte array to string
-        oldValString:= string(valAsbytes[:])
+       
+          oldValString := string(valAsbytes)
        
        if err2 != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + key + "\"}"
