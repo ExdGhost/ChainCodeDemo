@@ -189,6 +189,7 @@ if len(args) != 1 {
 
 func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
     var key, jsonResp string
+    var user Account
 
     if len(args) != 1 {
         return nil, errors.New("Incorrect number of arguments. Expecting user id key to query")
@@ -196,11 +197,18 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
 
     key = args[0]
     valAsbytes, err := stub.GetState(key)
-
+    
     if err != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + key + "\"}"
         return nil, errors.New(jsonResp)
     }
 
-    return valAsbytes, nil
+    err1:= json.Unmarshal(valAsbytes,&user)
+
+    if err1 != nil {
+        jsonResp = "{\"Error\":\"Failed to get object for " + key + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+
+    return []byte(user.ID+user.Prefix+user.Token), nil
 }
