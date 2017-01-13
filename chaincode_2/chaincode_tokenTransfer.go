@@ -210,5 +210,5 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.ID+user.Prefix+user.Token), nil
+    return []byte(user.ID+user.Prefix), nil
 }
