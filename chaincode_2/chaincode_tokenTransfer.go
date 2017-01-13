@@ -211,7 +211,7 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
     err1:= json.Unmarshal(valAsbytes,&user)
 
     if err1 != nil {
-        jsonResp = "{\"Error\":\"Failed to get object for " + key + "\"}"
+        jsonResp = "{\"Error\":\"Failed to get object for " + valAsbytes+ "\"}"
         return nil, errors.New(jsonResp)
     }
 
