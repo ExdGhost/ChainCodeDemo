@@ -2,10 +2,10 @@ package main
 
 import (
   "encoding/json"
-	"errors"
-	"fmt"
+  "errors"
+  "fmt"
   "strconv"
-	"github.com/hyperledger/fabric/core/chaincode/shim"
+  "github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 // SimpleChaincode example simple Chaincode implementation
@@ -25,8 +25,8 @@ type MyToken struct{
 
 type Account struct{
  
-  ID     string  `json:"id"`
-  Prefix string  `json:"prefix"`
+  ID     string  //`json:"id"`
+  Prefix string  //`json:"prefix"`
 //  Token MyToken  `json:"token"`
 
 }
@@ -169,7 +169,7 @@ if len(args) != 1 {
 	    return nil,errors.New("could not update counter")
      }
 
-       var user = Account{ID: uID, Prefix: uPrefix}
+       var user = Account{uID,uPrefix}
   
    userBytes,err2:= json.Marshal(&user)
 
