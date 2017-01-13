@@ -26,7 +26,7 @@ type MyToken struct{
 type Account struct{ 
   ID     string  `json:"id"`
   Prefix string  `json:"prefix"`
-//  Token MyToken  `json:"token"`
+  Token MyToken  `json:"token"`
 }
 
 //Transaction struct
@@ -79,7 +79,7 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, errors.New("Error creating token " + token.Tname)
     }
 
-   err2:= stub.PutState("counter",[]byte("0"))
+   err2:= stub.PutState("counter",[]byte("1"))
 
    if err2 != nil {
 
@@ -146,7 +146,7 @@ if len(args) != 1 {
         return nil,errx
         }
     
-    fmt.Println("Counter = %d",counter)
+    //fmt.Println("Counter = %d",counter)
 
     if counter < 10 {
     	uPrefix = strconv.Itoa(counter)+"0"+uSuffix
@@ -170,16 +170,16 @@ if len(args) != 1 {
 			return nil,errors.New("Error creating account " + user.ID)
 		}
 
-     err3 := stub.PutState(uID,userBytes)  //comit account to stub
+     err3 := stub.PutState(uPrefix+uID,userBytes)  //comit account to stub
 
      if err3 != nil {
 			fmt.Println("error commiting account" + user.ID)
 			return nil, errors.New("Error commiting account " + user.ID)
 		}
    
-   fmt.Println("UID = %s",user.Prefix+user.ID)
+   //fmt.Println("UID = %s",user.Prefix+user.ID)
 
-   return []byte(user.Prefix),nil
+   return []byte(uPrefix+uID),nil
 }
 
 //get an user from the stub and return the user details as json 
@@ -207,5 +207,5 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.Prefix+user.ID), nil
+    return []byte(user.Prefix+'&'+user.ID), nil
 }
