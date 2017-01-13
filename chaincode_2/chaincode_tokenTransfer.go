@@ -131,7 +131,6 @@ if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	} 
 
-	var user Account
   var uSuffix , uPrefix, uID string
 
     uID = args[0]
@@ -170,7 +169,7 @@ if len(args) != 1 {
 	    return nil,errors.New("could not update counter")
      }
 
-   user = Account{ID:uID,Prefix:uPrefix}
+       var user = Account{ID: uID, Prefix: uPrefix}
   
    userBytes,err2:= json.Marshal(&user)
 
@@ -179,7 +178,7 @@ if len(args) != 1 {
 			return nil,errors.New("Error creating account " + user.ID)
 		}
 
-    err3 := stub.PutState(user.Prefix + user.ID, userBytes)  //comit account to stub
+    err3 := stub.PutState(uPrefix,userBytes)  //comit account to stub
 
      if err3 != nil {
 			fmt.Println("error commiting account" + user.ID)
@@ -188,7 +187,7 @@ if len(args) != 1 {
    
    fmt.Println("UID = %s",user.Prefix+user.ID)
 
-   return []byte(user.Prefix + user.ID),nil
+   return []byte(user.Prefix),nil
 }
 
 //get an user from the stub and return the user details as json 
@@ -216,5 +215,5 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.ID+user.Prefix), nil
+    return []byte(user.ID), nil
 }
