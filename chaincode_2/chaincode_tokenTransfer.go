@@ -18,7 +18,7 @@ type MyToken struct{
 	
 	TID     string   `json:"tid"`
 	Tname   string   `json:"tname"`
-  Tamount string   `json:"tamount"`
+   Tamount string   `json:"tamount"`
 }  
 
 //Account struct 
@@ -27,7 +27,7 @@ type Account struct{
  
   ID     string  `json:"id"`
   Prefix string  `json:"prefix"`
-  Token MyToken  `json:"token"`
+//  Token MyToken  `json:"token"`
 
 }
 
@@ -140,6 +140,8 @@ if len(args) != 1 {
 
     counterBytes,err:= stub.GetState("counter") 
 
+    
+
     if err != nil {
     	fmt.Println("could not retrieve counter")			//error
 	    return nil,errors.New("could not retrieve counter")
@@ -151,6 +153,8 @@ if len(args) != 1 {
         return nil,errx
         }
     
+    fmt.Println("Counter = %d",counter)
+
     if counter < 10 {
     	uPrefix = strconv.Itoa(counter)+"0"+uSuffix
     } else{
@@ -181,6 +185,8 @@ if len(args) != 1 {
 			fmt.Println("error commiting account" + user.ID)
 			return nil, errors.New("Error commiting account " + user.ID)
 		}
+   
+   fmt.Println("UID = %s",user.Prefix+user.ID)
 
    return []byte(user.Prefix + user.ID),nil
 }
