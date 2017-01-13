@@ -23,12 +23,10 @@ type MyToken struct{
 
 //Account struct 
 
-type Account struct{
- 
+type Account struct{ 
   ID     string  `json:"id"`
   Prefix string  `json:"prefix"`
 //  Token MyToken  `json:"token"`
-
 }
 
 //Transaction struct
@@ -127,19 +125,15 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 // Create User
 func (t *SimpleChaincode) createUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
+   var uSuffix,uPrefix,uID string
+
 if len(args) != 1 {
 		return nil, errors.New("Incorrect number of arguments. Expecting 1")
 	} 
 
-  var uSuffix , uPrefix, uID string
-
     uID = args[0]
-
     uSuffix="000U"
-
     counterBytes,err:= stub.GetState("counter") 
-
-    
 
     if err != nil {
     	fmt.Println("could not retrieve counter")			//error
@@ -160,8 +154,7 @@ if len(args) != 1 {
     	uPrefix = strconv.Itoa(counter)+uSuffix
     }
 
-    counter = counter + 1
-    
+    counter = counter + 1   
     err1:= stub.PutState("counter",[]byte(strconv.Itoa(counter))) //Set new value of counter back to stub
    
    if err1 != nil {
@@ -169,16 +162,15 @@ if len(args) != 1 {
 	    return nil,errors.New("could not update counter")
      }
 
-       var user = Account{uID,uPrefix}
-  
-   userBytes,err2:= json.Marshal(&user)
+       var user = Account{ID:uID,Prefix:uPrefix}
+       userBytes,err2:= json.Marshal(&user)
 
   if err2 != nil {
 			fmt.Println("error creating account" + user.ID)
 			return nil,errors.New("Error creating account " + user.ID)
 		}
 
-    err3 := stub.PutState(uPrefix,userBytes)  //comit account to stub
+     err3 := stub.PutState(uID,userBytes)  //comit account to stub
 
      if err3 != nil {
 			fmt.Println("error commiting account" + user.ID)
@@ -201,7 +193,7 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
     }
 
     key = args[0]
-    valAsbytes, err := stub.GetState(key)
+    valAsbytes,err:= stub.GetState(key)
     
     if err != nil {
         jsonResp = "{\"Error\":\"Failed to get state for " + key + "\"}"
@@ -215,5 +207,5 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.ID), nil
+    return []byte(user.Prefix+user.ID), nil
 }
