@@ -25,8 +25,8 @@ type MyToken struct{
 
 type Account struct{
  
-  ID     string  //`json:"id"`
-  Prefix string  //`json:"prefix"`
+  ID     string  `json:"id"`
+  Prefix string  `json:"prefix"`
 //  Token MyToken  `json:"token"`
 
 }
@@ -211,7 +211,7 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
     err1:= json.Unmarshal(valAsbytes,&user)
 
     if err1 != nil {
-        jsonResp = "{\"Error\":\"Failed to get object for " + valAsbytes+ "\"}"
+        jsonResp = "{\"Error\":\"Failed to get object for " + string(valAsbytes) + "\"}"
         return nil, errors.New(jsonResp)
     }
 
