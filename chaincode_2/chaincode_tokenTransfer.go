@@ -279,6 +279,20 @@ func (t *SimpleChaincode) seedToken(stub shim.ChaincodeStubInterface, args []str
 
    user.Token.Tamount=tamount
 
+   userBytes,err = json.Marshal(&user)
+
+   if err != nil {
+			fmt.Println("error Marshalling account for ID : " + user.ID)
+			return nil,errors.New("error Marshalling account for ID : " + user.ID)
+		}
+
+      err = stub.PutState(uID,userBytes)
+
+      if err != nil {
+			fmt.Println("error updating account for ID : " + user.ID)
+			return nil,errors.New("error updating account for ID : " + user.ID)
+		}
+
    return nil,nil
     
 }
