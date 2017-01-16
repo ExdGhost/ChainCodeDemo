@@ -18,7 +18,7 @@ type MyToken struct{
 	
 	TID     string   `json:"tid"`
 	Tname   string   `json:"tname"`
-   Tamount string   `json:"tamount"`
+    Tamount string   `json:"tamount"`
 }  
 
 //Account struct 
@@ -26,6 +26,7 @@ type MyToken struct{
 type Account struct{ 
   ID     string  `json:"id"`
   Prefix string  `json:"prefix"`
+  CashBalance float64 `json:"CashBalance"`
   Token MyToken  `json:"token"`
 }
 
@@ -101,14 +102,7 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     }
 
     if function == "createUser" {
-        userid,err:= t.createUser(stub,args)
-
-        if err != nil {
-        	return nil,err
-        } else {
-        	args[0] = string(userid)
-        	return t.getUser(stub,args)
-        }
+        return t.createUser(stub,args)
     }
 
      
@@ -132,26 +126,52 @@ func (t *SimpleChaincode) Query(stub shim.ChaincodeStubInterface, function strin
 // Create User
 func (t *SimpleChaincode) createUser(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
 
-   var uSuffix,uPrefix,uID string
+   var uSuffix,uPrefix,uID,tID string
+   var initialCash float64
+   var errf error
+   var token,newToken MyToken
 
-if len(args) != 1 {
-		return nil, errors.New("Incorrect number of arguments. Expecting 1")
+if len(args) != 3 {
+		return nil, errors.New("Incorrect number of arguments. Expecting 3")
 	} 
 
     uID = args[0]
+    tID = args[1]
     uSuffix="000U"
+
+    initialCash,errf = strconv.ParseFloat(args[2],64)
+     if errf != nil {
+	    return nil,errors.New("could not convert cash")
+     }
+    
     counterBytes,err:= stub.GetState("counter") 
 
     if err != nil {
     	fmt.Println("could not retrieve counter")			//error
 	    return nil,errors.New("could not retrieve counter")
      }
+     
+    tokenBytes,erry:= stub.GetState(tID)
+    
+    if erry != nil {
+        return nil,errors.New("Could not find the specified Token")
+        }
+
+       erry=json.Unmarshal(tokenBytes,&token)
+      
+       if erry != nil {
+        return nil,errors.New("Could not unmsarshal token")
+        }
 
     counter,errx:= strconv.Atoi(string(counterBytes))
 
        if errx != nil {
         return nil,errx
         }
+
+      //Initialize the new token
+
+       newToken = MyToken{TID:token.TID,Tname:token.Tname,Tamount:token.Tamount}
     
     //fmt.Println("Counter = %d",counter)
 
@@ -168,8 +188,9 @@ if len(args) != 1 {
     	fmt.Println("could not update counter")			//error
 	    return nil,errors.New("could not update counter")
      }
-
-       var user = Account{ID:uID,Prefix:uPrefix}
+       
+       //Initialize the user
+       var user = Account{ID:uID,Prefix:uPrefix,CashBalance:initialCash,Token:newToken}
        userBytes,err2:= json.Marshal(&user)
 
   if err2 != nil {
@@ -214,5 +235,5 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.Prefix+user.ID), nil
+    return []byte(user.Prefix+"&"+user.ID+"&"+user.Token.TID+"&"+user.Token.Tamount), nil
 }
