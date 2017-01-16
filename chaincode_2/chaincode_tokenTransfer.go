@@ -105,6 +105,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
         return t.createUser(stub,args)
     }
 
+      if function == "seedToken" {
+        return t.seedToken(stub,args)
+    }
+
      
     fmt.Println("invoke did not find func: " + function)					//error
 	return nil, errors.New("Received unknown function invocation: " + function)
@@ -140,6 +144,7 @@ if len(args) != 3 {
     uSuffix="000U"
 
     initialCash,errf = strconv.ParseFloat(args[2],64)
+
      if errf != nil {
 	    return nil,errors.New("could not convert cash")
      }
@@ -235,5 +240,45 @@ func (t *SimpleChaincode) getUser(stub shim.ChaincodeStubInterface, args []strin
         return nil, errors.New(jsonResp)
     }
 
-    return []byte(user.Prefix+"&"+user.ID+"&"+user.Token.TID+"&"+user.Token.Tamount), nil
+    return []byte(user.Prefix+"&"+user.ID+"&"+strconv.FormatFloat(user.CashBalance,'f',-1,64)+"&"+user.Token.TID+"&"+user.Token.Tamount), nil
+}
+
+//seed user account with token
+func (t *SimpleChaincode) seedToken(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+     
+    var user Account
+    var jsonResp string
+
+      if len(args) != 2 {
+        return nil, errors.New("Incorrect number of arguments. Expecting user id and token amount to query")
+     }
+
+     uID := args[0]
+     tamount := args[1]
+
+   userBytes,err := stub.GetState(uID)
+
+    if err != nil {
+        jsonResp = "{\"Error\":\"Failed to get state for " + uID + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+   
+   err = json.Unmarshal(userBytes,&user)
+
+   if err != nil {
+        jsonResp = "{\"Error\":\"Failed to get object for " + string(userBytes) + "\"}"
+        return nil, errors.New(jsonResp)
+    }
+
+   /* newAmount,err1:= strconv.ParseFloat(tamount,64)
+    
+     if err1 != nil {
+        jsonResp = "Failed to convert string to float64"
+        return nil, errors.New(jsonResp)
+    }*/
+
+   user.Token.Tamount=tamount
+
+   return nil,nil
+    
 }
