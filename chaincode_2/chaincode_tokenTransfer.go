@@ -179,7 +179,7 @@ if len(args) != 1 {
    
    //fmt.Println("UID = %s",user.Prefix+user.ID)
 
-   return nil,errors.New(uPrefix+uID)
+   return []byte(uPrefix+uID),nil
 }
 
 //get an user from the stub and return the user details as json 
