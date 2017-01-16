@@ -88,6 +88,14 @@ func (t *SimpleChaincode) Init(stub shim.ChaincodeStubInterface, function string
 		return nil, errors.New("Error creating counter ")
     }
 
+     err3:= stub.PutState("Tcounter",[]byte("1"))
+
+   if err3 != nil {
+
+    	fmt.Println("error creating Transaction counter")
+		return nil, errors.New("Error Transaction creating counter ")
+    }
+
   return nil, nil
 }
 
@@ -107,6 +115,10 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
 
       if function == "seedToken" {
         return t.seedToken(stub,args)
+    }
+
+    if function == "sendToken" {
+        return t.sendToken(stub,args)
     }
 
      
@@ -295,4 +307,109 @@ func (t *SimpleChaincode) seedToken(stub shim.ChaincodeStubInterface, args []str
 
    return nil,nil
     
+}
+
+//Transfer token from one user to another user
+func (t *SimpleChaincode) sendToken(stub shim.ChaincodeStubInterface, args []string) ([]byte, error) {
+
+	  var sender,receiver Account
+      var err error
+      var newAmount,senderTokenAmount,receiverTokenAmount int
+
+      if len(args) != 3 {
+        return nil, errors.New("Incorrect number of arguments.Expecting user id and token amount to query")
+     }
+
+	
+	 senderID := args[0]
+	 receiverID := args[1]
+	  
+	  //Conver the token amount to float64 
+	  tamount,err := strconv.Atoi(args[2])
+
+	  if err!= nil{
+	  	return nil,errors.New("Could not convert from string to float in arguement")
+	  }
+       
+      //Retrieve Sender account
+      senderBytes,err := stub.GetState(senderID)
+      
+      if err != nil{
+	  	return nil,errors.New("Could not find sender account")
+	  }
+      
+      //Retrieve receiver account
+	  receiverBytes,err := stub.GetState(receiverID)
+
+	  if err != nil{
+	  	return nil,errors.New("Could not find receiver account")
+	  }
+
+      //Unmarshal sender
+      err = json.Unmarshal(senderBytes,&sender)
+
+       if err != nil{
+	  	return nil,errors.New("Could not Unmarshal sender")
+	  }
+      
+       //Unmarshal receiver
+	   err = json.Unmarshal(receiverBytes,&receiver)
+
+       if err != nil{
+	  	return nil,errors.New("Could not Unmarshal receiver")
+	  }
+     
+   receiverTokenAmount,err = strconv.Atoi(receiver.Token.Tamount)
+
+    if err != nil {
+    	return nil,errors.New("Could not convert to int from receiver token amount")
+    }
+
+   senderTokenAmount,err = strconv.Atoi(sender.Token.Tamount)
+
+    if err != nil {
+    	return nil,errors.New("Could not convert to int from sender token amount")
+    }
+  
+  //Make transaction
+
+    //Substract amount to be transferred from sender and set new value in sender
+  newAmount = senderTokenAmount - tamount
+
+  sender.Token.Tamount = strconv.Itoa(newAmount)
+
+  //Add amount to be transferred to receiver and set new value in reveiver
+  newAmount = receiverTokenAmount + tamount
+
+  receiver.Token.Tamount = strconv.Itoa(newAmount)
+  
+  //Re-Marshal new sender object
+  senderBytes,err = json.Marshal(&sender)
+  
+  if err != nil {
+    	return nil,errors.New("Could not Re-Marshal sender object")
+    }
+ 
+  //Commit updated sender to stub
+  err = stub.PutState(senderID,senderBytes)
+
+  if err != nil {
+    	return nil,errors.New("Could not commit updated sender object")
+    }
+
+    //Re-Marshal new receiver object
+  receiverBytes,err = json.Marshal(&receiver)
+  
+  if err != nil {
+    	return nil,errors.New("Could not Re-Marshal receiver object")
+    }
+ 
+  //Commit updated receiver to stub
+   err = stub.PutState(receiverID,receiverBytes)
+
+  if err != nil {
+    	return nil,errors.New("Could not commit updated receiver object")
+    }
+
+ return nil,nil
 }
