@@ -101,7 +101,14 @@ func (t *SimpleChaincode) Invoke(stub shim.ChaincodeStubInterface, function stri
     }
 
     if function == "createUser" {
-        return t.createUser(stub,args)
+        userid,err:= t.createUser(stub,args)
+
+        if err != nil {
+        	return nil,err
+        } else {
+        	args[0] = string(userid)
+        	return t.getUser(stub,args)
+        }
     }
 
      
